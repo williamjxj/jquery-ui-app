@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>To build a basic To Do style app - taskos</title>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
+<!--script src="bootstrap/js/bootstrap.min.js"></script-->
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+<style type="text/css">
+#container {
+	width: 600px;
+	margin: 10px auto;
+	/*text-align:center;*/
+	-webkit-box-shadow: 0 8px 6px -6px black;
+	-moz-box-shadow: 0 8px 6px -6px black;
+	box-shadow: 0 8px 6px -6px black;
+}
+ol {
+	margin-bottom: 10px;
+}
+span.delete {
+	float: right;
+	margin-right: 10px;
+}
+.ctask {
+	float: left;
+	margin-left: 10px;
+}
+label.ctask {
+	font-size: large;
+	font-weight: bolder;
+}
+label.error {
+	float: none;
+	color: red;
+	padding-left: .5em;
+	vertical-align: top;
+}
+p {
+	clear: both;
+}
+em {
+	font-weight: bold;
+	padding-right: 1em;
+	vertical-align: top;
+}
+.clear {
+	clear: both;
+}
+.ldiv {
+	background-color: #fcf8e3;
+	clear: both;
+}
+.info {
+	color: #c09853;
+	font-weight: bolder;
+	background-color: #fcf8e3;
+	border-color: #c09853;
+}
+</style>
+<script>
+$(document).ready(function() {
+	var count = 1;
+	$('#datepicker').datepicker();
+	$('button', 'form' ).button();
+	
+	var validator = $('#taskform').validate({
+		rules: {
+			task: "required",
+			who: "required",
+			when: "required"
+		},
+		messages: {
+			task: "Enter a task",
+			who: "Who for this task?",
+			when: "Select a date"
+		}
+	});
+
+	$('#taskform').submit(function(e) {
+		e.preventDefault();
+		
+		if(!validator.form()) {
+			return false;
+		}
+		
+		var task = $('#task').val()
+		, who = $('#who').val()
+		, when = $('#datepicker').val()
+		, flag = false;
+		
+		if($('#tasklist').html().length>0) {
+			$('#tasklist div[id^="task_"]').each(function(index) {
+				if (task == $(this).find('label').text()) {
+					did = $(this).closest('div[id^="task_"]').attr('id');
+					did1 = '#' + did;
+
+					$('<li><em>' + who + '</em>,  ' + when + '</li>').appendTo($(did1+' ol'));
+					flag = true;
+				}
+			});
+			
+			if(flag) {
+				return false;
+			}
+		}
+		
+		var did = 'task_' + count++;
+		var did1 = '#' + did;
+		
+		$('<div/>').attr('id',did).addClass('clear').appendTo('#tasklist');
+
+		if(count%2) {
+			$('div[id="'+did+'"]').addClass('ldiv').removeClass('clear');
+		}
+		
+		$('<label class="checkbox ctask"><input type="checkbox" />' + task + '</label>')
+			.appendTo(did1);
+		
+		$('<span class="delete"><a href="'+ did1 +'"><i class="icon-remove"/></a></span>')
+			.appendTo(did1);
+
+		$('<hr/>').addClass('clear').appendTo(did1);
+
+		$('<ol class="ctask" />').append('<li><em>' + who + '</em>,  ' + when + '</li>').appendTo(did1);		
+	});
+	
+	$('span.delete a').live('click', function(e) {
+		e.preventDefault();
+		dt = $(this).attr('href');
+		if(confirm('Are you sure to delete task [ ' +  dt + ' ] ?')) {
+			if (/http/.test(dt)) {
+				dt = dt.replace(/^.*\//, '');
+			}
+			$(dt).remove();
+		}
+		return false;
+	});
+
+    $('input[type="checkbox"]').live('change', function() {
+		$(this).closest('div').animate({height:'show',width:'show',opacity: 'show'}, 'slow');
+		var did = $(this).closest('div');
+		if($('label', did).is('.info')) {
+			$('ol>li, label', did).removeClass('info');
+		}
+		else {			
+			$('ol>li, label', did).addClass('info');
+		}
+    });
+});
+</script>
+</head>
+
+<body>
+<div id="container">
+  <h2>taskos</h2>
+  <form action="" method="post" id="taskform" class="well">
+    <fieldset>
+      <legend>- a tasklist todo app -</legend>
+      <div>
+        <input name="task" id="task" type="text" placeholder="What needs to be done?" class="span3" style="width:80%" />
+      </div>
+      <div>
+        <input name="who" id="who" type="text" placeholder="By whom?" class="span3" />
+        <input name="when" id="datepicker" type="text" placeholder="By when?" class="span3" />
+      </div>
+      <div>
+        <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </fieldset>
+  </form>
+  <div id="tasklist"></div>
+</div>
+</body>
+</html>
