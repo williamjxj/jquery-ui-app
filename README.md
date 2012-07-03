@@ -9,4 +9,4 @@ jquery task list and UI
 
 3. use bootstrap.css to customize.
 
-4. js to process <form> and <ol> list.
+4. js to process &lt;form> and &lt;ol> list.
